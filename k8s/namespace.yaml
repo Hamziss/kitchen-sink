@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kitchen-sink
+  labels:
+    app.kubernetes.io/name: kitchen-sink
+    app.kubernetes.io/managed-by: argocd

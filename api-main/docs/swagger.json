@@ -1,0 +1,249 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Viva API",
+    "description": "Production-ready Express.js REST API with TypeScript, PostgreSQL, and JWT authentication",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "hamza@gmail.com"
+    },
+    "license": {
+      "name": "ISC"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Health check and monitoring endpoints"
+    }
+  ],
+  "paths": {
+    "/health/": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Overall health check",
+        "description": "Check the health status of the application and Prisma (database).",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Readiness probe",
+        "description": "Check if the application is ready to serve traffic (Kubernetes-ready).",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/health/live": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Liveness probe",
+        "description": "Check if the application is alive (Kubernetes-ready).",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com"
+          },
+          "role": {
+            "type": "string",
+            "example": "user"
+          },
+          "enable": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2025-01-15T10:30:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2025-01-15T10:30:00.000Z"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "Test@1234"
+          },
+          "stay": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "Test@1234"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "stay": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "LOGIN_SUCCESS"
+          },
+          "message": {
+            "type": "string",
+            "example": "Logged in successfully"
+          },
+          "data": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "stay": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
+          "message": {
+            "type": "string",
+            "example": "ERROR_TYPE"
+          },
+          "error": {
+            "type": "string",
+            "example": "Detailed error message"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "uptime": {
+            "type": "number",
+            "example": 12345.67
+          },
+          "timestamp": {
+            "type": "number",
+            "example": 1234567890000
+          },
+          "status": {
+            "type": "string",
+            "example": "OK"
+          },
+          "checks": {
+            "type": "object",
+            "properties": {
+              "mongodb": {
+                "type": "string",
+                "example": "UP"
+              },
+              "redis": {
+                "type": "string",
+                "example": "UP"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Enter your bearer token in the format: Bearer <token>"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "token",
+        "description": "JWT token stored in cookie"
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-second-config
+  namespace: kitchen-sink
+  labels:
+    app: api-second
+    app.kubernetes.io/name: api-second
+    app.kubernetes.io/component: backend
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  CORS_ORIGIN: "https://hamziss.com"

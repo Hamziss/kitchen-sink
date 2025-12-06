@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-second
+  namespace: kitchen-sink
+  labels:
+    app: api-second
+    app.kubernetes.io/name: api-second
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: kitchen-sink
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-second
+  template:
+    metadata:
+      labels:
+        app: api-second
+        app.kubernetes.io/name: api-second
+    spec:
+      containers:
+        - name: api-second
+          image: harbor.hamziss.com/production/api-second:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: api-second-config
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
