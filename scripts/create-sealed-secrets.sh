@@ -35,6 +35,14 @@ if ! command -v kubeseal &> /dev/null; then
     exit 1
 fi
 
+# Resolve paths so the script can be run from any working directory
+SCRIPT_DIR=$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/.." && pwd)
+OUTPUT_DIR="${PROJECT_ROOT}/k8s/sealed-secrets"
+
+# Ensure output directory exists
+mkdir -p "${OUTPUT_DIR}"
+
 # Create temp directory for raw secrets
 TEMP_DIR=$(mktemp -d)
 trap "rm -rf $TEMP_DIR" EXIT
@@ -84,12 +92,12 @@ echo ""
 echo -e "${GREEN}Creating sealed secret...${NC}"
 
 # Seal the secret
-kubeseal --format yaml < "${TEMP_DIR}/secret-raw.yaml" > k8s/sealed-secrets/api-main-sealed-secret.yaml
+kubeseal --format yaml < "${TEMP_DIR}/secret-raw.yaml" > "${OUTPUT_DIR}/api-main-sealed-secret.yaml"
 
 echo ""
 echo -e "${GREEN}✅ Sealed secret created successfully!${NC}"
 echo ""
-echo "File created: k8s/sealed-secrets/api-main-sealed-secret.yaml"
+echo "File created: ${OUTPUT_DIR}/api-main-sealed-secret.yaml"
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
 echo "1. Review the sealed secret file"

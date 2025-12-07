@@ -1,0 +1,23 @@
+# =============================================================================
+# Kubernetes Service for myapi2
+# =============================================================================
+# Internal ClusterIP service for the second API. Peers and the ingress can
+# reach it at: myapi2-service.default.svc.cluster.local (or simply myapi2-service).
+# =============================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapi2-service
+  labels:
+    app: myapi2
+    environment: production
+spec:
+  type: ClusterIP
+  selector:
+    app: myapi2
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 5000

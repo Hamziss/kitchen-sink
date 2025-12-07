@@ -1,0 +1,161 @@
+# =============================================================================
+# Kubernetes Deployment for myapi
+# =============================================================================
+# This deployment manages the Node.js API application with:
+# - 2 replicas for high availability
+# - Private Harbor registry authentication
+# - Health checks (liveness and readiness probes)
+# - Resource limits for stability
+# =============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Name of the deployment - used to identify and manage this resource
+  name: myapi-deployment
+  # Labels for organizing and selecting resources
+  labels:
+    app: myapi
+    environment: production
+spec:
+  # Number of pod replicas to maintain
+  replicas: 2
+
+  # Selector to match pods managed by this deployment
+  selector:
+    matchLabels:
+      app: myapi
+
+  # Strategy for rolling updates - ensures zero downtime deployments
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # Maximum number of pods that can be created over the desired replica count
+      maxSurge: 1
+      # Maximum number of pods that can be unavailable during update
+      maxUnavailable: 0
+
+  # Pod template specification
+  template:
+    metadata:
+      labels:
+        app: myapi
+    spec:
+      # =======================================================================
+      # Image Pull Secrets
+      # =======================================================================
+      # Required for pulling images from private Harbor registry
+      # Create this secret using: kubectl create secret docker-registry harbor-registry-secret ...
+      imagePullSecrets:
+        - name: harbor-registry-secret
+
+      # =======================================================================
+      # Container Specification
+      # =======================================================================
+      containers:
+        - name: myapi
+          # Harbor private registry image
+          # Format: <registry-host>:<port>/<project>/<image>:<tag>
+          image: 134.209.232.225:8080/production/api:latest
+
+          # Always pull to ensure latest image (use IfNotPresent for tagged versions)
+          imagePullPolicy: Always
+
+          # Container port - must match the port your Node.js app listens on
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+              name: http
+
+          # ===================================================================
+          # Environment Variables
+          # ===================================================================
+          env:
+            # Node environment - set to production for optimized performance
+            - name: NODE_ENV
+              value: "production"
+
+            # Application port - must match containerPort
+            - name: PORT
+              value: "5000"
+
+            # Database connection string - loaded from secret for security
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: myapi-secrets
+                  key: database-url
+
+          # ===================================================================
+          # Resource Limits and Requests
+          # ===================================================================
+          # Requests: Guaranteed resources for scheduling
+          # Limits: Maximum resources the container can use
+          resources:
+            requests:
+              cpu: "100m" # 0.1 CPU cores
+              memory: "128Mi" # 128 MiB memory
+            limits:
+              cpu: "500m" # 0.5 CPU cores
+              memory: "512Mi" # 512 MiB memory
+
+          # ===================================================================
+          # Liveness Probe
+          # ===================================================================
+          # Determines if the container is running properly
+          # If this fails, Kubernetes will restart the container
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 5000
+            # Wait before starting probes (allow app to start)
+            initialDelaySeconds: 40
+            # How often to perform the probe
+            periodSeconds: 30
+            # Probe timeout
+            timeoutSeconds: 3
+            # Number of failures before restarting
+            failureThreshold: 3
+
+          # ===================================================================
+          # Readiness Probe
+          # ===================================================================
+          # Determines if the container is ready to receive traffic
+          # If this fails, the pod is removed from service endpoints
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 5000
+            # Start checking readiness sooner than liveness
+            initialDelaySeconds: 10
+            # Check more frequently for readiness
+            periodSeconds: 10
+            # Probe timeout
+            timeoutSeconds: 3
+            # Number of failures before marking as not ready
+            failureThreshold: 3
+
+          # ===================================================================
+          # Startup Probe (Optional)
+          # ===================================================================
+          # Gives the application time to start before liveness kicks in
+          # Useful for slow-starting applications
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 5000
+            # Allow up to 5 minutes for startup (30 * 10 seconds)
+            failureThreshold: 30
+            periodSeconds: 10
+
+      # =======================================================================
+      # Pod Configuration
+      # =======================================================================
+      # Restart policy - Always restart on failure
+      restartPolicy: Always
+
+      # Grace period for pod termination (seconds)
+      terminationGracePeriodSeconds: 30
+
+      # DNS policy for the pod
+      dnsPolicy: ClusterFirst

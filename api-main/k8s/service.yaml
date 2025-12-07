@@ -1,0 +1,61 @@
+# =============================================================================
+# Kubernetes Service for myapi
+# =============================================================================
+# This service exposes the myapi deployment to external traffic using NodePort
+# - NodePort allows access from outside the cluster via <NodeIP>:31000
+# - Internal cluster access via myapi-service:5000
+# =============================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  # Name of the service - used for DNS resolution within the cluster
+  # Other pods can reach this service at: myapi-service.default.svc.cluster.local
+  name: myapi-service
+  # Labels for organizing and selecting resources
+  labels:
+    app: myapi
+    environment: production
+spec:
+  # ==========================================================================
+  # Service Type
+  # ==========================================================================
+  # NodePort: Exposes the service on each Node's IP at a static port
+  # Other options: ClusterIP (internal only), LoadBalancer (cloud providers)
+  type: NodePort
+
+  # ==========================================================================
+  # Selector
+  # ==========================================================================
+  # Matches pods with these labels to receive traffic
+  # Must match the labels defined in deployment.yaml pod template
+  selector:
+    app: myapi
+
+  # ==========================================================================
+  # Port Configuration
+  # ==========================================================================
+  ports:
+    - name: http
+      # Protocol for the port
+      protocol: TCP
+
+      # Port exposed by the service (internal cluster access)
+      # Access within cluster: myapi-service:80
+      port: 80
+
+      # Target port on the pod/container
+      # Must match the containerPort in deployment.yaml
+      targetPort: 5000
+
+      # NodePort - external access port on each node
+      # Access from outside: <any-node-ip>:31000
+      # Valid range: 30000-32767
+      nodePort: 31000
+
+  # ==========================================================================
+  # Session Affinity (Optional)
+  # ==========================================================================
+  # None: Requests are distributed randomly across pods
+  # ClientIP: Requests from same client go to same pod
+  sessionAffinity: None

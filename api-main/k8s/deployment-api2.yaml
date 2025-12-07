@@ -1,0 +1,84 @@
+# =============================================================================
+# Kubernetes Deployment for myapi2
+# =============================================================================
+# A sibling Node.js API service that can talk to the original myapi via
+# in-cluster DNS. Uses a distinct image/secret/labels to avoid collisions.
+# =============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapi2-deployment
+  labels:
+    app: myapi2
+    environment: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapi2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: myapi2
+    spec:
+      imagePullSecrets:
+        - name: harbor-registry-secret
+      containers:
+        - name: myapi2
+          image: 134.209.232.225:8080/production/api2:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+              name: http
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "5000"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: myapi2-secrets
+                  key: database-url
+            # Base URL for calling the original API from inside the cluster
+            - name: PEER_API_URL
+              value: "http://myapi-service"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 5000
+            initialDelaySeconds: 40
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 5000
+            failureThreshold: 30
+            periodSeconds: 10
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
