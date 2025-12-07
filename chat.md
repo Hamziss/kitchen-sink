@@ -2,6 +2,7 @@
 
 Step-by-Step: Deploy
 artillery run load-test/api2-load-test.yml
+vim /etc/rancher/k3s/k3s.yaml -> lens
 <a name="table-of-contents"></a>
 
 ## Table of Contents
