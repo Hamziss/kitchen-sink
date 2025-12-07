@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: backend
     app.kubernetes.io/part-of: kitchen-sink
 spec:
-  replicas: 0
+  replicas: 2
   selector:
     matchLabels:
       app: api-main
