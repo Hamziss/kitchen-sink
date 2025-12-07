@@ -3,6 +3,7 @@
 Step-by-Step: Deploy
 artillery run load-test/api2-load-test.yml
 vim /etc/rancher/k3s/k3s.yaml -> lens
+kubectl create secret docker-registry harbor-pull-secret --docker-server=harbor.hamziss.com --docker-username='admin' --docker-password='Harbor12345' --docker-email='hamzachebbah9999@gmail.com' -n kitchen-sink
 <a name="table-of-contents"></a>
 
 ## Table of Contents
