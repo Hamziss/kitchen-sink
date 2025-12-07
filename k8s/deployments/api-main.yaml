@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: backend
     app.kubernetes.io/part-of: kitchen-sink
 spec:
-  replicas: 2
+  replicas: 0
   selector:
     matchLabels:
       app: api-main
@@ -19,9 +19,11 @@ spec:
         app: api-main
         app.kubernetes.io/name: api-main
     spec:
+      imagePullSecrets:
+        - name: harbor-pull-secret
       containers:
         - name: api-main
-          image: harbor.hamziss.com/production/api-main:latest
+          image: harbor.hamziss.com/production/api-main:v1.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 5000

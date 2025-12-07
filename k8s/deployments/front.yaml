@@ -19,9 +19,11 @@ spec:
         app: front
         app.kubernetes.io/name: front
     spec:
+      imagePullSecrets:
+        - name: harbor-pull-secret
       containers:
         - name: front
-          image: harbor.hamziss.com/production/front:latest
+          image: harbor.hamziss.com/production/front:v1.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 80

@@ -19,9 +19,11 @@ spec:
         app: api-second
         app.kubernetes.io/name: api-second
     spec:
+      imagePullSecrets:
+        - name: harbor-pull-secret
       containers:
         - name: api-second
-          image: harbor.hamziss.com/production/api-second:latest
+          image: harbor.hamziss.com/production/api-second:v1.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

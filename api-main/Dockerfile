@@ -2,9 +2,9 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Set DATABASE_URL before generating Prisma client
-ARG DATABASE_URL
-ENV DATABASE_URL=$DATABASE_URL
+# Set DATABASE_URL before generating Prisma client; fall back to a safe placeholder during builds
+ARG DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder?schema=public"
+ENV DATABASE_URL=${DATABASE_URL}
 
 COPY package*.json ./
 
