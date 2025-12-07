@@ -1,0 +1,19 @@
+config:
+  target: "https://api2.hamziss.com"
+  phases:
+    - duration: 60
+      arrivalRate: 20
+      name: "warm up"
+    - duration: 120
+      arrivalRate: 500
+      name: "steady load"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+scenarios:
+  - name: "basic flow"
+    flow:
+      - get:
+          url: "/health"
+      - get:
+          url: "/api/items"
